@@ -32,4 +32,19 @@ public class FilesController : Controller
         return RedirectToAction("Upload");
     }
 
+    [HttpGet]
+    public IActionResult List()
+    {
+        var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+        if (!Directory.Exists(uploadsPath))
+        {
+            Directory.CreateDirectory(uploadsPath);
+        }
+        
+        var files = Directory.GetFiles(uploadsPath).Select(f => Path.GetFileName(f)).ToList();
+        
+        return View(files);
+        
+    }
+
 }
