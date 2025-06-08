@@ -1,4 +1,4 @@
-@model List<string>
+@model List<AudioMetadata>
 
 <h2>Uploaded Audio Files</h2>
 
@@ -11,15 +11,21 @@ else
     <ul>
         @foreach (var file in Model)
         {
-            <li>
-                @file
+            <li style="padding: 10px; margin-bottom: 5px; border: 1px solid black;">
+                <p style="display: block; ">
+                    <strong>@file.Title</strong> by @string.Join(", ", file.Artists) (@file.Album)
+                </p>
+                @if (!string.IsNullOrEmpty(file.AlbumArtBase64))
+                {
+                    <img src="@file.AlbumArtBase64" alt="Album Art" style="max-width:100px;max-height:100px;" />
+                }
                 @{
                     string mimeType = null;
-                    if (file.EndsWith(".wav", StringComparison.OrdinalIgnoreCase))
+                    if (file.Title.EndsWith(".wav", StringComparison.OrdinalIgnoreCase))
                     {
                         mimeType = "audio/wav";
                     }
-                    else if (file.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase))
+                    else if (file.Title.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase))
                     {
                         mimeType = "audio/mp3";
                     }
@@ -27,7 +33,7 @@ else
                 @if (mimeType != null)
                 {
                     <audio controls>
-                        <source src="~/uploads/@file" type="@mimeType" />
+                        <source src="~/uploads/@file.Title" type="@mimeType"/>
                         Your browser does not support the audio element.
                     </audio>
                 }

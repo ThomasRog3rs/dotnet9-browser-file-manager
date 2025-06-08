@@ -15,7 +15,7 @@ public class FilesController : Controller
     [HttpGet]
     public IActionResult Upload()
     {
-        var files = _fileService.GetFileNames();   
+        var files = _fileService.GetFilesWithMetaData();
         var vm = new UploadPageViewModel
         {
             FileUpload = new UploadFileViewModel(),
@@ -30,7 +30,7 @@ public class FilesController : Controller
     {
         if (!ModelState.IsValid)
         {
-            var files = _fileService.GetFileNames();  
+            var files = _fileService.GetFilesWithMetaData();  
             vm.Files = files;
             return View(vm);
         }
@@ -53,7 +53,7 @@ public class FilesController : Controller
     [HttpGet]
     public IActionResult List()
     {
-        var files = _fileService.GetFileNames();  
+        var files = _fileService.GetFilesWithMetaData();  
         return View(files);
     }
 
