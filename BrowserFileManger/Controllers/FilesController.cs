@@ -5,11 +5,17 @@ namespace BrowserFileManger.Controllers;
 
 public class FilesController : Controller
 {
-    private readonly string _uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+    private readonly FileService _fileService;
+
+    public FilesController(FileService fileService)
+    {
+        _fileService = fileService;
+    }
+    
     [HttpGet]
     public IActionResult Upload()
     {
-        var files = FileService.GetFiles(_uploadsPath);   
+        var files = _fileService.GetFileNames();   
         var vm = new UploadPageViewModel
         {
             FileUpload = new UploadFileViewModel(),
@@ -24,7 +30,7 @@ public class FilesController : Controller
     {
         if (!ModelState.IsValid)
         {
-            var files = FileService.GetFiles(_uploadsPath);   
+            var files = _fileService.GetFileNames();  
             vm.Files = files;
             return View(vm);
         }
@@ -47,7 +53,7 @@ public class FilesController : Controller
     [HttpGet]
     public IActionResult List()
     {
-        var files = FileService.GetFiles(_uploadsPath);   
+        var files = _fileService.GetFileNames();  
         return View(files);
     }
 

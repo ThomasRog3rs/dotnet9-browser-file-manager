@@ -1,10 +1,19 @@
 namespace BrowserFileManger.Services;
 
-public static class FileService
+public class FileService
 {
-    public static List<string> GetFiles(string directoryPath)
+    private readonly string _uploadsPath;
+
+    public FileService()
     {
-        return Directory.GetFiles(directoryPath)
+        _uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+        if(!Directory.Exists(_uploadsPath))
+            Directory.CreateDirectory(_uploadsPath);
+    }
+    
+    public List<string> GetFileNames()
+    {
+        return Directory.GetFiles(_uploadsPath)
             .Select(file => Path.GetFileName(file))
             .ToList();
     }

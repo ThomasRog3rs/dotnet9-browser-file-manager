@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http.Features;
+using BrowserFileManger.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost.ConfigureKestrel(serverOptions =>
@@ -12,6 +13,8 @@ builder.Services.Configure<FormOptions>(options =>
 {
     options.MultipartBodyLengthLimit = long.MaxValue;
 });
+
+builder.Services.AddSingleton<FileService>();
 
 var app = builder.Build();
 
