@@ -1,23 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
 using BrowserFileManger.ViewModels;
-
+using BrowserFileManger.Services;
 namespace BrowserFileManger.Controllers;
 
 public class FilesController : Controller
 {
+    private readonly string _uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
     [HttpGet]
     public IActionResult Upload()
     {
-        var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-        if (!Directory.Exists(uploadsPath))
-        {
-            Directory.CreateDirectory(uploadsPath);
-        }
-        
-        var files = Directory.GetFiles(uploadsPath)
-            .Select(f => Path.GetFileName(f))
-            .ToList();
-        
+        var files = FileService.GetFiles(_uploadsPath);   
         var vm = new UploadPageViewModel
         {
             FileUpload = new UploadFileViewModel(),
@@ -32,13 +24,7 @@ public class FilesController : Controller
     {
         if (!ModelState.IsValid)
         {
-            var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-            Directory.CreateDirectory(uploadsPath);
-
-            var files = Directory.GetFiles(uploadsPath)
-                .Select(f => Path.GetFileName(f))
-                .ToList();
-
+            var files = FileService.GetFiles(_uploadsPath);   
             vm.Files = files;
             return View(vm);
         }
@@ -61,16 +47,7 @@ public class FilesController : Controller
     [HttpGet]
     public IActionResult List()
     {
-        var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-        if (!Directory.Exists(uploadsPath))
-        {
-            Directory.CreateDirectory(uploadsPath);
-        }
-        
-        var files = Directory.GetFiles(uploadsPath)
-            .Select(f => Path.GetFileName(f))
-            .ToList();
-
+        var files = FileService.GetFiles(_uploadsPath);   
         return View(files);
     }
 
