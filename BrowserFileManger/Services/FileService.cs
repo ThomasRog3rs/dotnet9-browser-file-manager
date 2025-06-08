@@ -40,7 +40,8 @@ public class FileService
 
         var metadata = new AudioMetadata
         {
-            Title = fileName,
+            FileName = fileName,
+            Title = file.Tag.Title,
             TrackNumber = file.Tag.Track,
             Album = file.Tag.Album,
             Artists = file.Tag.AlbumArtists,

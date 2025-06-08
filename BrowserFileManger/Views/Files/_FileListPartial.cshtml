@@ -21,21 +21,22 @@ else
                 }
                 @{
                     string mimeType = null;
-                    if (file.Title.EndsWith(".wav", StringComparison.OrdinalIgnoreCase))
+                    if (file.FileName.EndsWith(".wav", StringComparison.OrdinalIgnoreCase))
                     {
                         mimeType = "audio/wav";
                     }
-                    else if (file.Title.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase))
+                    else if (file.FileName.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase))
                     {
                         mimeType = "audio/mp3";
                     }
                 }
                 @if (mimeType != null)
                 {
-                    <audio controls>
-                        <source src="~/uploads/@file.Title" type="@mimeType"/>
+                    <audio style="display: block; margin-top:5px" controls>
+                        <source src="~/uploads/@file.FileName" type="@mimeType"/>
                         Your browser does not support the audio element.
                     </audio>
+                    <span style="font-size: 11px;">(@file.FileName)</span>
                 }
                 else
                 {

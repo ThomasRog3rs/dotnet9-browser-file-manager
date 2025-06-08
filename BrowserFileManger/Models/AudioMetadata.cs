@@ -2,6 +2,7 @@ namespace BrowserFileManger.Models;
 
 public class AudioMetadata
 {
+    public string FileName { get; set; }
     public string Title { get; set; }
     public uint TrackNumber { get; set; }
     public string Album { get; set; }
