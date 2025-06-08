@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using BrowserFileManger.ViewModels;
 
 namespace BrowserFileManger.Controllers;
 
@@ -11,13 +12,14 @@ public class FilesController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Upload(IFormFile file)
+    public async Task<IActionResult> Upload(UplodaFileViewModel vm)
     {
-        if (file == null || file.Length == 0)
+        if (!ModelState.IsValid)
         {
-            ModelState.AddModelError("", "Please select a file");
-            return View();
+            return View(vm);
         }
+
+        var file = vm.File;
         
         var uploads = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
         Directory.CreateDirectory(uploads);

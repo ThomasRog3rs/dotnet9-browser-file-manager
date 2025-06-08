@@ -1,3 +1,5 @@
+@model BrowserFileManger.ViewModels.UplodaFileViewModel
+
 @{
     ViewData["Title"] = "Upload Files";
 } 
@@ -5,7 +7,7 @@
 <h1>Upload your Song</h1>
 
 <form asp-action="Upload" method="post" enctype="multipart/form-data">
-    <input type="file" name="file" />
+    <input asp-for="File" type="file" name="file" />
     <button type="submit">Upload</button>
 </form>
 
