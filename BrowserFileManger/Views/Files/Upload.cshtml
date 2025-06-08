@@ -1,4 +1,4 @@
-@model BrowserFileManger.ViewModels.UplodaFileViewModel
+@model BrowserFileManger.ViewModels.UploadPageViewModel
 
 @{
     ViewData["Title"] = "Upload Files";
@@ -7,7 +7,7 @@
 <h1>Upload your Song</h1>
 
 <form asp-action="Upload" method="post" enctype="multipart/form-data">
-    <input asp-for="File" type="file" name="file" />
+    <input asp-for="FileUpload.File" type="file" />
     <button type="submit">Upload</button>
 </form>
 
@@ -20,3 +20,7 @@
         }
     </ul>
 }
+
+<hr>
+
+@await Html.PartialAsync("_FileListPartial", Model.Files)

@@ -1,0 +1,41 @@
+@model List<string>
+
+<h2>Uploaded Audio Files</h2>
+
+@if (!Model.Any())
+{
+    <p>No files found.</p>
+}
+else
+{
+    <ul>
+        @foreach (var file in Model)
+        {
+            <li>
+                @file
+                @{
+                    string mimeType = null;
+                    if (file.EndsWith(".wav", StringComparison.OrdinalIgnoreCase))
+                    {
+                        mimeType = "audio/wav";
+                    }
+                    else if (file.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase))
+                    {
+                        mimeType = "audio/mp3";
+                    }
+                }
+                @if (mimeType != null)
+                {
+                    <audio controls>
+                        <source src="~/uploads/@file" type="@mimeType" />
+                        Your browser does not support the audio element.
+                    </audio>
+                }
+                else
+                {
+                    <span style="color: red;">(File type not supported for playback)</span>
+                }
+            </li>
+        }
+    </ul>
+}

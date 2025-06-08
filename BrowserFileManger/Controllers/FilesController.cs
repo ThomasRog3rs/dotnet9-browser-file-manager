@@ -8,18 +8,42 @@ public class FilesController : Controller
     [HttpGet]
     public IActionResult Upload()
     {
-        return View();
+        var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+        if (!Directory.Exists(uploadsPath))
+        {
+            Directory.CreateDirectory(uploadsPath);
+        }
+        
+        var files = Directory.GetFiles(uploadsPath)
+            .Select(f => Path.GetFileName(f))
+            .ToList();
+        
+        var vm = new UploadPageViewModel
+        {
+            FileUpload = new UploadFileViewModel(),
+            Files = files
+        };
+
+        return View(vm);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Upload(UplodaFileViewModel vm)
+    public async Task<IActionResult> Upload(UploadPageViewModel vm)
     {
         if (!ModelState.IsValid)
         {
+            var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            Directory.CreateDirectory(uploadsPath);
+
+            var files = Directory.GetFiles(uploadsPath)
+                .Select(f => Path.GetFileName(f))
+                .ToList();
+
+            vm.Files = files;
             return View(vm);
         }
 
-        var file = vm.File;
+        var file = vm.FileUpload.File;
         
         var uploads = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
         Directory.CreateDirectory(uploads);
@@ -43,10 +67,11 @@ public class FilesController : Controller
             Directory.CreateDirectory(uploadsPath);
         }
         
-        var files = Directory.GetFiles(uploadsPath).Select(f => Path.GetFileName(f)).ToList();
-        
+        var files = Directory.GetFiles(uploadsPath)
+            .Select(f => Path.GetFileName(f))
+            .ToList();
+
         return View(files);
-        
     }
 
 }
