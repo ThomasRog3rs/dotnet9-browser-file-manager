@@ -489,3 +489,5 @@ obj/
 *.suo
 *.vs/
 *.vs/
+
+BrowserFileManger/wwwroot/uploads
