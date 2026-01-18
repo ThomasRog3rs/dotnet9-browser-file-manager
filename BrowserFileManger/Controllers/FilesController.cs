@@ -201,6 +201,7 @@ public class FilesController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Sync()
     {
         var (imported, removed) = await _syncService.FullSyncAsync();

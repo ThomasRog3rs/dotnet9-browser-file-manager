@@ -157,10 +157,10 @@ public class TrackService
         await _context.SaveChangesAsync();
 
         // Sync metadata to file
-        await SyncTrackToFileAsync(track);
+        await SyncTrackToFileAsync(track, removeArt);
     }
 
-    public async Task SyncTrackToFileAsync(Track track)
+    public async Task SyncTrackToFileAsync(Track track, bool removeArt = false)
     {
         // Reload track with all related data
         var fullTrack = await _context.Tracks
@@ -182,7 +182,8 @@ public class TrackService
             fullTrack.TrackNumber,
             fullTrack.Album?.Name,
             artistNames,
-            fullTrack.AlbumArtData
+            fullTrack.AlbumArtData,
+            removeArt
         );
     }
 
