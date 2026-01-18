@@ -1,48 +1,87 @@
 @model List<AudioMetadata>
 
-<h2>Uploaded Audio Files</h2>
-
 @if (!Model.Any())
 {
-    <p>No files found.</p>
+    <div class="empty-state">
+        <div class="empty-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M8 12h8"></path>
+            </svg>
+        </div>
+        <h3 class="empty-title">No tracks yet</h3>
+        <p class="empty-subtitle">Upload your first audio file to get started</p>
+    </div>
 }
 else
 {
-    <ul>
+    <div class="track-grid">
         @foreach (var file in Model)
         {
-            <li style="padding: 10px; margin-bottom: 5px; border: 1px solid black;">
-                <p style="display: block; ">
-                    <strong>@file.Title</strong> by @string.Join(", ", file.Artists) (@file.Album)
-                </p>
-                @if (!string.IsNullOrEmpty(file.AlbumArtBase64))
-                {
-                    <img src="@file.AlbumArtBase64" alt="Album Art" style="max-width:100px;max-height:100px;" />
-                }
-                @{
-                    string mimeType = null;
-                    if (file.FileName.EndsWith(".wav", StringComparison.OrdinalIgnoreCase))
+            <div class="track-card">
+                <div class="track-artwork">
+                    @if (!string.IsNullOrEmpty(file.AlbumArtBase64))
                     {
-                        mimeType = "audio/wav";
+                        <img src="@file.AlbumArtBase64" alt="Album Art for @file.Title" class="artwork-image" />
                     }
-                    else if (file.FileName.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase))
+                    else
                     {
-                        mimeType = "audio/mp3";
+                        <div class="artwork-placeholder">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </div>
                     }
-                }
-                @if (mimeType != null)
-                {
-                    <audio style="display: block; margin-top:5px" controls>
-                        <source src="~/uploads/@file.FileName" type="@mimeType"/>
-                        Your browser does not support the audio element.
-                    </audio>
-                    <span style="font-size: 11px;">(@file.FileName)</span>
-                }
-                else
-                {
-                    <span style="color: red;">(File type not supported for playback)</span>
-                }
-            </li>
+                </div>
+                <div class="track-info">
+                    <h4 class="track-title">@(string.IsNullOrEmpty(file.Title) ? file.FileName : file.Title)</h4>
+                    @if (file.Artists != null && file.Artists.Any())
+                    {
+                        <p class="track-artist">@string.Join(", ", file.Artists)</p>
+                    }
+                    else
+                    {
+                        <p class="track-artist track-artist-unknown">Unknown Artist</p>
+                    }
+                    @if (!string.IsNullOrEmpty(file.Album))
+                    {
+                        <p class="track-album">@file.Album</p>
+                    }
+                </div>
+                <div class="track-player">
+                    @{
+                        string mimeType = null;
+                        if (file.FileName.EndsWith(".wav", StringComparison.OrdinalIgnoreCase))
+                        {
+                            mimeType = "audio/wav";
+                        }
+                        else if (file.FileName.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase))
+                        {
+                            mimeType = "audio/mpeg";
+                        }
+                    }
+                    @if (mimeType != null)
+                    {
+                        <audio controls class="audio-player">
+                            <source src="~/uploads/@file.FileName" type="@mimeType"/>
+                            Your browser does not support the audio element.
+                        </audio>
+                    }
+                    else
+                    {
+                        <div class="unsupported-format">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                            Unsupported format
+                        </div>
+                    }
+                </div>
+                <div class="track-filename">@file.FileName</div>
+            </div>
         }
-    </ul>
+    </div>
 }
