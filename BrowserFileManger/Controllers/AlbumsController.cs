@@ -21,6 +21,27 @@ public class AlbumsController : Controller
     }
 
     [HttpGet]
+    public async Task<IActionResult> Details(int id)
+    {
+        var album = await _albumService.GetAlbumByIdAsync(id);
+        if (album == null)
+            return NotFound();
+
+        var tracks = album.Tracks
+            .OrderBy(t => t.TrackNumber == 0 ? int.MaxValue : (int)t.TrackNumber)
+            .ThenBy(t => t.Title ?? t.FileName)
+            .ToList();
+
+        var vm = new AlbumDetailsViewModel
+        {
+            Album = album,
+            Tracks = tracks
+        };
+
+        return View(vm);
+    }
+
+    [HttpGet]
     public IActionResult Create()
     {
         return View(new EditAlbumViewModel());

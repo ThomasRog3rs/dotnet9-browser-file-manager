@@ -169,6 +169,27 @@
         });
     });
 
+    // Autoplay the next track within explicitly marked lists
+    const autoplayLists = document.querySelectorAll('[data-autoplay-next="true"]');
+
+    autoplayLists.forEach(list => {
+        const players = Array.from(list.querySelectorAll('.audio-player'));
+
+        players.forEach((player, index) => {
+            player.addEventListener('ended', function() {
+                const nextPlayer = players[index + 1];
+                if (!nextPlayer) return;
+
+                const playPromise = nextPlayer.play();
+                if (playPromise && typeof playPromise.catch === 'function') {
+                    playPromise.catch(() => {
+                        // Autoplay may be blocked; ignore to avoid console noise.
+                    });
+                }
+            });
+        });
+    });
+
     // ========================================
     // Card Hover Sound Effect (Optional)
     // ========================================
