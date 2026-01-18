@@ -4,6 +4,7 @@ using BrowserFileManger.Data;
 using BrowserFileManger.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+var migrateOnly = args.Contains("--migrate-only", StringComparer.OrdinalIgnoreCase);
 
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
@@ -37,14 +38,22 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     dbContext.Database.Migrate();
-    
-    // Import any existing files not in database
-    var syncService = scope.ServiceProvider.GetRequiredService<MetadataSyncService>();
-    var (imported, removed) = await syncService.FullSyncAsync();
-    if (imported > 0 || removed > 0)
+
+    if (!migrateOnly)
     {
-        Console.WriteLine($"Metadata sync: {imported} files imported, {removed} orphaned records removed");
+        // Import any existing files not in database
+        var syncService = scope.ServiceProvider.GetRequiredService<MetadataSyncService>();
+        var (imported, removed) = await syncService.FullSyncAsync();
+        if (imported > 0 || removed > 0)
+        {
+            Console.WriteLine($"Metadata sync: {imported} files imported, {removed} orphaned records removed");
+        }
     }
+}
+
+if (migrateOnly)
+{
+    return;
 }
 
 // Configure the HTTP request pipeline.
