@@ -4,21 +4,42 @@
     ViewData["Title"] = "Upload Files";
 } 
 
-<h1>Upload your Song</h1>
+<h1>Upload your Songs</h1>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
 
 <form asp-action="Upload" method="post" enctype="multipart/form-data">
-    <input asp-for="FileUpload.File" type="file" />
-    <button type="submit">Upload</button>
+    <div class="mb-3">
+        <label asp-for="FileUpload.Files" class="form-label">Select audio files (.mp3, .wav)</label>
+        <input asp-for="FileUpload.Files" type="file" class="form-control" multiple accept=".mp3,.wav" />
+        <span asp-validation-for="FileUpload.Files" class="text-danger"></span>
+        <div class="form-text">You can select multiple files at once</div>
+    </div>
+    <button type="submit" class="btn btn-primary">Upload</button>
 </form>
 
 @if (!ViewData.ModelState.IsValid)
 {
-    <ul>
-        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-        {
-            <li>@error.ErrorMessage</li>
-        }
-    </ul>
+    <div class="alert alert-danger mt-3">
+        <ul class="mb-0">
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+    </div>
 }
 
 <hr>

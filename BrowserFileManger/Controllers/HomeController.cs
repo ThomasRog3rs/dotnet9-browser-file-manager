@@ -47,20 +47,55 @@ public class HomeController : Controller
             return View(vm);
         }
 
-        var file = vm.FileUpload.File;
+        var files = vm.FileUpload.Files;
+        if (files == null || !files.Any())
+        {
+            ModelState.AddModelError("", "Please select at least one file to upload");
+            var tracks = await _trackService.GetAllTracksAsync();
+            vm.Files = tracks.Select(TrackToAudioMetadata).ToList();
+            return View(vm);
+        }
         
         var uploads = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
         Directory.CreateDirectory(uploads);
         
-        var filePath = Path.Combine(uploads, file.FileName);
-        
-        using (var stream = new FileStream(filePath, FileMode.Create))
+        int successCount = 0;
+        int failureCount = 0;
+        var errors = new List<string>();
+
+        foreach (var file in files)
         {
-            await file.CopyToAsync(stream);
+            try
+            {
+                var filePath = Path.Combine(uploads, file.FileName);
+                
+                // Save file to disk
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+                
+                // Import the newly uploaded file to database with metadata extraction
+                await _syncService.ImportFileAsync(file.FileName);
+                successCount++;
+            }
+            catch (Exception ex)
+            {
+                failureCount++;
+                errors.Add($"{file.FileName}: {ex.Message}");
+            }
+        }
+
+        // Provide feedback to user
+        if (successCount > 0)
+        {
+            TempData["SuccessMessage"] = $"Successfully uploaded {successCount} file(s)";
         }
         
-        // Import the newly uploaded file to database
-        await _syncService.ImportFileAsync(file.FileName);
+        if (failureCount > 0)
+        {
+            TempData["ErrorMessage"] = $"Failed to upload {failureCount} file(s): {string.Join("; ", errors)}";
+        }
         
         return RedirectToAction("Index");
     }
