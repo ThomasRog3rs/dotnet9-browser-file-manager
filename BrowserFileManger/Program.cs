@@ -31,6 +31,10 @@ builder.Services.AddScoped<AlbumService>();
 builder.Services.AddScoped<ArtistService>();
 builder.Services.AddScoped<MetadataSyncService>();
 
+// Configure compression options
+builder.Services.Configure<CompressionOptions>(builder.Configuration.GetSection("Compression"));
+builder.Services.AddScoped<AudioCompressionService>();
+
 var app = builder.Build();
 
 // Apply migrations and import existing files on startup

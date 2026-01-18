@@ -128,4 +128,42 @@ public class FileService
         
         return (file.Tag.Title, file.Tag.Track, file.Tag.Album, artists, albumArt);
     }
+    
+    /// <summary>
+    /// Gets the size of a file in bytes
+    /// </summary>
+    public long GetFileSize(string fileName)
+    {
+        var filePath = GetFilePath(fileName);
+        if (!System.IO.File.Exists(filePath))
+            return 0;
+        return new FileInfo(filePath).Length;
+    }
+    
+    /// <summary>
+    /// Gets the total size of all files in the uploads folder in bytes
+    /// </summary>
+    public long GetTotalStorageUsed()
+    {
+        if (!Directory.Exists(_uploadsPath))
+            return 0;
+        return Directory.GetFiles(_uploadsPath)
+            .Sum(f => new FileInfo(f).Length);
+    }
+    
+    /// <summary>
+    /// Formats a byte size as a human-readable string
+    /// </summary>
+    public static string FormatBytes(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB" };
+        double len = bytes;
+        int order = 0;
+        while (len >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            len /= 1024;
+        }
+        return $"{len:0.##} {sizes[order]}";
+    }
 }

@@ -13,19 +13,22 @@ public class FilesController : Controller
     private readonly AlbumService _albumService;
     private readonly ArtistService _artistService;
     private readonly MetadataSyncService _syncService;
+    private readonly AudioCompressionService _compressionService;
 
     public FilesController(
         FileService fileService,
         TrackService trackService,
         AlbumService albumService,
         ArtistService artistService,
-        MetadataSyncService syncService)
+        MetadataSyncService syncService,
+        AudioCompressionService compressionService)
     {
         _fileService = fileService;
         _trackService = trackService;
         _albumService = albumService;
         _artistService = artistService;
         _syncService = syncService;
+        _compressionService = compressionService;
     }
     
     [HttpGet]
@@ -65,6 +68,8 @@ public class FilesController : Controller
         
         int successCount = 0;
         int failureCount = 0;
+        long totalBytesSaved = 0;
+        int filesCompressed = 0;
         var errors = new List<string>();
 
         foreach (var file in files)
@@ -79,8 +84,18 @@ public class FilesController : Controller
                     await file.CopyToAsync(stream);
                 }
                 
-                // Import the newly uploaded file to database with metadata extraction
-                await _syncService.ImportFileAsync(file.FileName);
+                // Compress the file if needed
+                var compressionResult = await _compressionService.CompressIfNeededAsync(file.FileName);
+                var finalFileName = compressionResult.CompressedFileName;
+                
+                if (compressionResult.WasCompressed)
+                {
+                    totalBytesSaved += compressionResult.BytesSaved;
+                    filesCompressed++;
+                }
+                
+                // Import the file to database with metadata extraction
+                await _syncService.ImportFileAsync(finalFileName);
                 successCount++;
             }
             catch (Exception ex)
@@ -93,7 +108,12 @@ public class FilesController : Controller
         // Provide feedback to user
         if (successCount > 0)
         {
-            TempData["SuccessMessage"] = $"Successfully uploaded {successCount} file(s)";
+            var message = $"Successfully uploaded {successCount} file(s)";
+            if (filesCompressed > 0)
+            {
+                message += $". Compressed {filesCompressed} file(s), saved {AudioCompressionService.FormatBytes(totalBytesSaved)}";
+            }
+            TempData["SuccessMessage"] = message;
         }
         
         if (failureCount > 0)

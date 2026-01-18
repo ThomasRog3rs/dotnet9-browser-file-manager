@@ -12,6 +12,20 @@
 </div>
 
 <div class="upload-section">
+    <div class="compression-notice">
+        <div class="compression-notice-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+        </div>
+        <div class="compression-notice-content">
+            <strong>Automatic Compression:</strong> Files are compressed during upload to save storage. 
+            Lossless formats (WAV, FLAC) are converted to MP3 at 192 kbps.
+        </div>
+    </div>
+    
     <form asp-action="Index" method="post" enctype="multipart/form-data" id="uploadForm">
         <div class="upload-zone" id="uploadZone">
             <div class="upload-icon">
@@ -23,8 +37,8 @@
             </div>
             <h3 class="upload-title">Drop your audio files here</h3>
             <p class="upload-subtitle">or click to browse</p>
-            <p class="upload-formats">Supported formats: MP3, WAV</p>
-            <input asp-for="FileUpload.Files" type="file" id="fileInput" class="file-input" accept=".mp3,.wav" multiple />
+            <p class="upload-formats">Supported formats: MP3, WAV, FLAC</p>
+            <input asp-for="FileUpload.Files" type="file" id="fileInput" class="file-input" accept=".mp3,.wav,.flac" multiple />
         </div>
         <button type="submit" class="upload-btn" id="uploadBtn">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

@@ -6,6 +6,23 @@
 
 <h1>Upload your Songs</h1>
 
+<div class="alert alert-info mb-4">
+    <h5 class="alert-heading">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-info-circle me-2" viewBox="0 0 16 16">
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+            <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+        </svg>
+        Automatic File Compression
+    </h5>
+    <p class="mb-2">Files will be automatically compressed during upload to save storage space:</p>
+    <ul class="mb-0">
+        <li>Lossless formats (WAV, FLAC) will be converted to MP3 format</li>
+        <li>High-bitrate MP3 files may be recompressed to optimize storage</li>
+        <li>Original files will be replaced with compressed versions</li>
+        <li>Target bitrate: 192 kbps</li>
+    </ul>
+</div>
+
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="alert alert-success">
@@ -22,8 +39,8 @@
 
 <form asp-action="Upload" method="post" enctype="multipart/form-data">
     <div class="mb-3">
-        <label asp-for="FileUpload.Files" class="form-label">Select audio files (.mp3, .wav)</label>
-        <input asp-for="FileUpload.Files" type="file" class="form-control" multiple accept=".mp3,.wav" />
+        <label asp-for="FileUpload.Files" class="form-label">Select audio files (.mp3, .wav, .flac)</label>
+        <input asp-for="FileUpload.Files" type="file" class="form-control" multiple accept=".mp3,.wav,.flac" />
         <span asp-validation-for="FileUpload.Files" class="text-danger"></span>
         <div class="form-text">You can select multiple files at once</div>
     </div>

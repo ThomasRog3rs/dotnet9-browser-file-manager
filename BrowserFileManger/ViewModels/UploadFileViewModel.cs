@@ -6,6 +6,6 @@ namespace BrowserFileManger.ViewModels;
 public class UploadFileViewModel
 {
     [Required(ErrorMessage = "Please select at least one file")]
-    [AllowedFileExtensions([".wav", ".mp3"])]
+    [AllowedFileExtensions([".wav", ".mp3", ".flac"])]
     public List<IFormFile> Files { get; set; } = new();
 }
