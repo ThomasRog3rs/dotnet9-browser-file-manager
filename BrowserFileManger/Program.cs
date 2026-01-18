@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.EntityFrameworkCore;
+using BrowserFileManger.Data;
 using BrowserFileManger.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost.ConfigureKestrel(serverOptions =>
@@ -14,9 +17,35 @@ builder.Services.Configure<FormOptions>(options =>
     options.MultipartBodyLengthLimit = long.MaxValue;
 });
 
+// Configure SQLite Database
+var dbPath = Path.Combine(builder.Environment.ContentRootPath, "Data", "app.db");
+Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlite($"Data Source={dbPath}"));
+
+// Register services
 builder.Services.AddSingleton<FileService>();
+builder.Services.AddScoped<TrackService>();
+builder.Services.AddScoped<AlbumService>();
+builder.Services.AddScoped<ArtistService>();
+builder.Services.AddScoped<MetadataSyncService>();
 
 var app = builder.Build();
+
+// Apply migrations and import existing files on startup
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    dbContext.Database.Migrate();
+    
+    // Import any existing files not in database
+    var syncService = scope.ServiceProvider.GetRequiredService<MetadataSyncService>();
+    var (imported, removed) = await syncService.FullSyncAsync();
+    if (imported > 0 || removed > 0)
+    {
+        Console.WriteLine($"Metadata sync: {imported} files imported, {removed} orphaned records removed");
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

@@ -1,25 +1,41 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using BrowserFileManger.ViewModels;
 using BrowserFileManger.Services;
+using BrowserFileManger.Models;
+
 namespace BrowserFileManger.Controllers;
 
 public class FilesController : Controller
 {
     private readonly FileService _fileService;
+    private readonly TrackService _trackService;
+    private readonly AlbumService _albumService;
+    private readonly ArtistService _artistService;
+    private readonly MetadataSyncService _syncService;
 
-    public FilesController(FileService fileService)
+    public FilesController(
+        FileService fileService,
+        TrackService trackService,
+        AlbumService albumService,
+        ArtistService artistService,
+        MetadataSyncService syncService)
     {
         _fileService = fileService;
+        _trackService = trackService;
+        _albumService = albumService;
+        _artistService = artistService;
+        _syncService = syncService;
     }
     
     [HttpGet]
-    public IActionResult Upload()
+    public async Task<IActionResult> Upload()
     {
-        var files = _fileService.GetFilesWithMetaData();
+        var tracks = await _trackService.GetAllTracksAsync();
         var vm = new UploadPageViewModel
         {
             FileUpload = new UploadFileViewModel(),
-            Files = files
+            Files = tracks.Select(TrackToAudioMetadata).ToList()
         };
 
         return View(vm);
@@ -30,8 +46,8 @@ public class FilesController : Controller
     {
         if (!ModelState.IsValid)
         {
-            var files = _fileService.GetFilesWithMetaData();  
-            vm.Files = files;
+            var tracks = await _trackService.GetAllTracksAsync();
+            vm.Files = tracks.Select(TrackToAudioMetadata).ToList();
             return View(vm);
         }
 
@@ -47,14 +63,162 @@ public class FilesController : Controller
             await file.CopyToAsync(stream);
         }
         
+        // Import the newly uploaded file to database
+        await _syncService.ImportFileAsync(file.FileName);
+        
         return RedirectToAction("Upload");
     }
 
     [HttpGet]
-    public IActionResult List()
+    public async Task<IActionResult> List(string? q, int? album, int? artist, string? sort)
     {
-        var files = _fileService.GetFilesWithMetaData();  
-        return View(files);
+        var albums = await _albumService.GetAllAlbumsAsync();
+        var artists = await _artistService.GetAllArtistsAsync();
+        var tracks = await _trackService.GetAllTracksAsync(q, album, artist, sort);
+        
+        var vm = new TrackListViewModel
+        {
+            Tracks = tracks,
+            SearchQuery = q,
+            FilterAlbumId = album,
+            FilterArtistId = artist,
+            SortBy = sort,
+            AlbumOptions = new SelectList(albums, "Id", "Name"),
+            ArtistOptions = new SelectList(artists, "Id", "Name")
+        };
+        
+        return View(vm);
     }
 
+    [HttpGet]
+    public async Task<IActionResult> Edit(int id)
+    {
+        var track = await _trackService.GetTrackByIdAsync(id);
+        if (track == null)
+            return NotFound();
+
+        var albums = await _albumService.GetAllAlbumsAsync();
+        var artists = await _artistService.GetAllArtistsAsync();
+
+        var vm = new EditTrackViewModel
+        {
+            Id = track.Id,
+            FileName = track.FileName,
+            Title = track.Title,
+            TrackNumber = track.TrackNumber,
+            AlbumId = track.AlbumId,
+            SelectedArtistIds = track.TrackArtists.Select(ta => ta.ArtistId).ToList(),
+            CurrentAlbumArtBase64 = track.AlbumArtBase64,
+            AlbumOptions = new SelectList(albums, "Id", "Name"),
+            ArtistOptions = new MultiSelectList(artists, "Id", "Name", track.TrackArtists.Select(ta => ta.ArtistId)),
+            ArtistSuggestions = artists.Select(a => a.Name).ToList()
+        };
+
+        return View(vm);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(EditTrackViewModel vm)
+    {
+        vm.SelectedArtistIds ??= new();
+        ModelState.Remove(nameof(EditTrackViewModel.SelectedArtistIds));
+
+        if (!ModelState.IsValid)
+        {
+            var albums = await _albumService.GetAllAlbumsAsync();
+            var artists = await _artistService.GetAllArtistsAsync();
+            vm.AlbumOptions = new SelectList(albums, "Id", "Name");
+            vm.ArtistOptions = new MultiSelectList(artists, "Id", "Name", vm.SelectedArtistIds);
+            vm.ArtistSuggestions = artists.Select(a => a.Name).ToList();
+            return View(vm);
+        }
+
+        var track = await _trackService.GetTrackByIdAsync(vm.Id);
+        if (track == null)
+            return NotFound();
+
+        // Handle new album creation
+        int? albumId = vm.AlbumId;
+        if (!string.IsNullOrWhiteSpace(vm.NewAlbumName))
+        {
+            var newAlbum = await _albumService.GetOrCreateAlbumAsync(vm.NewAlbumName.Trim());
+            albumId = newAlbum.Id;
+        }
+
+        // Handle new artist creation
+        var artistIds = vm.SelectedArtistIds ?? new List<int>();
+        if (!string.IsNullOrWhiteSpace(vm.NewArtistNames))
+        {
+            var newArtistNames = vm.NewArtistNames.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            var newArtists = await _artistService.GetOrCreateArtistsAsync(newArtistNames);
+            artistIds.AddRange(newArtists.Select(a => a.Id));
+            artistIds = artistIds.Distinct().ToList();
+        }
+
+        // Handle album art
+        byte[]? albumArt = null;
+        if (vm.AlbumArtFile != null && vm.AlbumArtFile.Length > 0)
+        {
+            using var ms = new MemoryStream();
+            await vm.AlbumArtFile.CopyToAsync(ms);
+            albumArt = ms.ToArray();
+        }
+
+        await _trackService.UpdateTrackAsync(
+            vm.Id,
+            vm.Title,
+            vm.TrackNumber,
+            albumId,
+            artistIds,
+            albumArt,
+            vm.RemoveAlbumArt);
+
+        TempData["SuccessMessage"] = "Track metadata updated successfully!";
+        return RedirectToAction("List");
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var track = await _trackService.GetTrackByIdAsync(id);
+        if (track == null)
+            return NotFound();
+
+        // Delete file from disk
+        var filePath = _fileService.GetFilePath(track.FileName);
+        if (System.IO.File.Exists(filePath))
+        {
+            System.IO.File.Delete(filePath);
+        }
+
+        // Delete from database
+        await _trackService.DeleteTrackAsync(id);
+
+        TempData["SuccessMessage"] = "Track deleted successfully!";
+        return RedirectToAction("List");
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Sync()
+    {
+        var (imported, removed) = await _syncService.FullSyncAsync();
+        TempData["SuccessMessage"] = $"Sync complete: {imported} files imported, {removed} orphaned records removed.";
+        return RedirectToAction("List");
+    }
+
+    // Helper method to convert Track to AudioMetadata for legacy view compatibility
+    private static AudioMetadata TrackToAudioMetadata(Track track)
+    {
+        return new AudioMetadata
+        {
+            FileName = track.FileName,
+            Title = track.Title,
+            TrackNumber = track.TrackNumber,
+            Album = track.Album?.Name,
+            Artists = track.TrackArtists.Select(ta => ta.Artist?.Name ?? "").Where(n => !string.IsNullOrEmpty(n)).ToArray(),
+            AlbumArt = track.AlbumArtData
+        };
+    }
 }

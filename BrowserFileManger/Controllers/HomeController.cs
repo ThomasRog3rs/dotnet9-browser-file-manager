@@ -10,21 +10,29 @@ public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
     private readonly FileService _fileService;
+    private readonly TrackService _trackService;
+    private readonly MetadataSyncService _syncService;
 
-    public HomeController(ILogger<HomeController> logger, FileService fileService)
+    public HomeController(
+        ILogger<HomeController> logger, 
+        FileService fileService,
+        TrackService trackService,
+        MetadataSyncService syncService)
     {
         _logger = logger;
         _fileService = fileService;
+        _trackService = trackService;
+        _syncService = syncService;
     }
 
     [HttpGet]
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        var files = _fileService.GetFilesWithMetaData();
+        var tracks = await _trackService.GetAllTracksAsync();
         var vm = new UploadPageViewModel
         {
             FileUpload = new UploadFileViewModel(),
-            Files = files
+            Files = tracks.Select(TrackToAudioMetadata).ToList()
         };
         return View(vm);
     }
@@ -34,8 +42,8 @@ public class HomeController : Controller
     {
         if (!ModelState.IsValid)
         {
-            var files = _fileService.GetFilesWithMetaData();
-            vm.Files = files;
+            var tracks = await _trackService.GetAllTracksAsync();
+            vm.Files = tracks.Select(TrackToAudioMetadata).ToList();
             return View(vm);
         }
 
@@ -51,6 +59,9 @@ public class HomeController : Controller
             await file.CopyToAsync(stream);
         }
         
+        // Import the newly uploaded file to database
+        await _syncService.ImportFileAsync(file.FileName);
+        
         return RedirectToAction("Index");
     }
 
@@ -63,5 +74,19 @@ public class HomeController : Controller
     public IActionResult Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+    }
+    
+    // Helper method to convert Track to AudioMetadata for legacy view compatibility
+    private static AudioMetadata TrackToAudioMetadata(Track track)
+    {
+        return new AudioMetadata
+        {
+            FileName = track.FileName,
+            Title = track.Title,
+            TrackNumber = track.TrackNumber,
+            Album = track.Album?.Name,
+            Artists = track.TrackArtists.Select(ta => ta.Artist?.Name ?? "").Where(n => !string.IsNullOrEmpty(n)).ToArray(),
+            AlbumArt = track.AlbumArtData
+        };
     }
 }
