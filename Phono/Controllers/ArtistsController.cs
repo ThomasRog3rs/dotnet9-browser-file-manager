@@ -1,16 +1,22 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Phono.Models;
 using Phono.ViewModels;
 using Phono.Services;
 
 namespace Phono.Controllers;
 
+[Authorize]
 public class ArtistsController : Controller
 {
     private readonly ArtistService _artistService;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public ArtistsController(ArtistService artistService)
+    public ArtistsController(ArtistService artistService, UserManager<ApplicationUser> userManager)
     {
         _artistService = artistService;
+        _userManager = userManager;
     }
 
     [HttpGet]
