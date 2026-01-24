@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Phono.Data;
 using Phono.Services;
@@ -19,10 +20,33 @@ builder.Services.Configure<FormOptions>(options =>
 });
 
 // Configure SQLite Database
-var dbPath = Path.Combine(builder.Environment.ContentRootPath, "Data", "app.db");
-Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    var dbPath = Path.Combine(builder.Environment.ContentRootPath, "Data", "app.db");
+    Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
+    connectionString = $"Data Source={dbPath}";
+}
+else
+{
+    var sqliteBuilder = new SqliteConnectionStringBuilder(connectionString);
+    var dataSource = sqliteBuilder.DataSource;
+    if (!string.IsNullOrWhiteSpace(dataSource) && !Path.IsPathRooted(dataSource))
+    {
+        dataSource = Path.Combine(builder.Environment.ContentRootPath, dataSource);
+        sqliteBuilder.DataSource = dataSource;
+        connectionString = sqliteBuilder.ToString();
+    }
+
+    var dataDirectory = Path.GetDirectoryName(sqliteBuilder.DataSource);
+    if (!string.IsNullOrWhiteSpace(dataDirectory))
+    {
+        Directory.CreateDirectory(dataDirectory);
+    }
+}
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite($"Data Source={dbPath}"));
+    options.UseSqlite(connectionString));
 
 // Register services
 builder.Services.AddSingleton<FileService>();
@@ -69,16 +93,16 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
+
 app.UseRouting();
 
 app.UseAuthorization();
 
-app.MapStaticAssets();
-
 app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
+    ;
 
 
 app.Run();

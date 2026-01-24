@@ -1,0 +1,10 @@
+.git
+.gitignore
+.DS_Store
+**/.DS_Store
+**/bin
+**/obj
+**/node_modules
+**/wwwroot/uploads
+**/*.db
+**/*.sqlite

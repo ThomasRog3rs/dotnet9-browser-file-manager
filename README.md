@@ -39,6 +39,19 @@ ffmpeg -version
 dotnet run --project Phono
 ```
 
+## Docker
+
+Build and run:
+
+```bash
+docker compose up --build
+```
+
+Then open `http://localhost:8080`.
+
+Docker uses SQLite with a local `./data` directory for the database and `./uploads`
+for audio files, so your data persists across container restarts.
+
 ## First pull: seed the database schema
 
 The SQLite database file is not tracked in git. After your first pull, run the
