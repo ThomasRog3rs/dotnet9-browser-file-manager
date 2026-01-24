@@ -1,0 +1,67 @@
+@model Phono.ViewModels.EditArtistViewModel
+
+@{
+    ViewData["Title"] = "Edit Artist";
+}
+
+<div class="edit-page">
+    <div class="edit-header">
+        <a asp-action="Index" class="back-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Back to Artists
+        </a>
+        <h1 class="edit-title">Edit Artist</h1>
+        <p class="edit-subtitle">Update artist details for <span class="filename">@Model.Name</span></p>
+    </div>
+
+    <div class="edit-content">
+        <div class="edit-form-container edit-form-narrow">
+            <form asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+
+                <div class="form-section">
+                    <h3 class="section-title">Artist Details</h3>
+                    
+                    <div class="form-group">
+                        <label asp-for="Name" class="form-label"></label>
+                        <input asp-for="Name" class="form-input" placeholder="Enter artist name" />
+                        <span asp-validation-for="Name" class="validation-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Bio" class="form-label"></label>
+                        <textarea asp-for="Bio" class="form-textarea" rows="4" placeholder="Enter artist biography (optional)"></textarea>
+                        <span asp-validation-for="Bio" class="validation-error"></span>
+                    </div>
+
+                    <div class="form-info">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 16v-4M12 8h.01"/>
+                        </svg>
+                        This artist has @Model.TrackCount track@(Model.TrackCount != 1 ? "s" : "")
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                            <polyline points="17 21 17 13 7 13 7 21"/>
+                            <polyline points="7 3 7 8 15 8"/>
+                        </svg>
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

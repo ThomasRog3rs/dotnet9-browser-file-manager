@@ -1,4 +1,4 @@
 $ErrorActionPreference = "Stop"
 
-$project = Join-Path $PSScriptRoot "..\BrowserFileManger"
+$project = Join-Path $PSScriptRoot "..\Phono"
 dotnet run --project $project -- --migrate-only

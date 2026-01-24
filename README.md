@@ -1,4 +1,4 @@
-# Browser File Manager
+# Phono
 
 A simple ASP.NET Core app for managing local audio files and metadata.
 
@@ -36,7 +36,7 @@ ffmpeg -version
 ## Quick start
 
 ```bash
-dotnet run --project BrowserFileManger
+dotnet run --project Phono
 ```
 
 ## First pull: seed the database schema
