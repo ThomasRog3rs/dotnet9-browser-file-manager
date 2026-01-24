@@ -1,4 +1,4 @@
-﻿// SoundVault - UI Enhancement Scripts
+// Phono - UI Enhancement Scripts
 
 (function() {
     'use strict';
