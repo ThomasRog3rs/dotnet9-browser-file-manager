@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Phono.ViewModels;
@@ -6,6 +8,7 @@ using Phono.Models;
 
 namespace Phono.Controllers;
 
+[Authorize]
 public class FilesController : Controller
 {
     private readonly FileService _fileService;
@@ -14,6 +17,7 @@ public class FilesController : Controller
     private readonly ArtistService _artistService;
     private readonly MetadataSyncService _syncService;
     private readonly AudioCompressionService _compressionService;
+    private readonly UserManager<ApplicationUser> _userManager;
 
     public FilesController(
         FileService fileService,
@@ -21,7 +25,8 @@ public class FilesController : Controller
         AlbumService albumService,
         ArtistService artistService,
         MetadataSyncService syncService,
-        AudioCompressionService compressionService)
+        AudioCompressionService compressionService,
+        UserManager<ApplicationUser> userManager)
     {
         _fileService = fileService;
         _trackService = trackService;
@@ -29,6 +34,7 @@ public class FilesController : Controller
         _artistService = artistService;
         _syncService = syncService;
         _compressionService = compressionService;
+        _userManager = userManager;
     }
     
     [HttpGet]

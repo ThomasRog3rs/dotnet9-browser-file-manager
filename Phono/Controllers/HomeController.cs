@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Phono.Models;
 using Phono.Services;
@@ -6,6 +8,7 @@ using Phono.ViewModels;
 
 namespace Phono.Controllers;
 
+[Authorize]
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
@@ -13,19 +16,22 @@ public class HomeController : Controller
     private readonly TrackService _trackService;
     private readonly MetadataSyncService _syncService;
     private readonly AudioCompressionService _compressionService;
+    private readonly UserManager<ApplicationUser> _userManager;
 
     public HomeController(
         ILogger<HomeController> logger, 
         FileService fileService,
         TrackService trackService,
         MetadataSyncService syncService,
-        AudioCompressionService compressionService)
+        AudioCompressionService compressionService,
+        UserManager<ApplicationUser> userManager)
     {
         _logger = logger;
         _fileService = fileService;
         _trackService = trackService;
         _syncService = syncService;
         _compressionService = compressionService;
+        _userManager = userManager;
     }
 
     [HttpGet]
