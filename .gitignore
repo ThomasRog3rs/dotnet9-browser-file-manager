@@ -497,3 +497,4 @@ obj/
 *.vs/
 
 Phono/wwwroot/uploads
+uploads/*.mp3
