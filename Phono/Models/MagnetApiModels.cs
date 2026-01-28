@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Phono.Models;
 
 /// <summary>
@@ -5,7 +7,9 @@ namespace Phono.Models;
 /// </summary>
 public class TorrentSearchResult
 {
+    [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
+    [JsonPropertyName("magnet")]
     public string Magnet { get; set; } = string.Empty;
     public string Seeders { get; set; } = string.Empty;
     public string Leechers { get; set; } = string.Empty;
