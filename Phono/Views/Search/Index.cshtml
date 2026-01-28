@@ -4,71 +4,111 @@
     ViewData["Title"] = "Search";
 }
 
-<div class="d-flex align-items-center justify-content-between mb-4">
-    <div>
-        <h1 class="h3 mb-0">Search</h1>
-        <p class="text-muted mb-0">Search Pirate Bay audio torrents.</p>
+<div class="mt-5 mb-4">
+    <div class="mb-4">
+        <h1 class="h3 mb-2 text-white">Search</h1>
+        <p class="text-light opacity-75 mb-0">Search Pirate Bay audio torrents.</p>
+    </div>
+
+    <form method="get" asp-controller="Search" asp-action="Index" class="mb-4" id="searchForm">
+        <div class="input-group input-group-lg">
+            <input type="text" class="form-control" name="query" value="@Model.Query" placeholder="Search for a song or artist..." required />
+            <button class="btn btn-primary px-4" type="submit">
+                <i class="bi bi-search me-2"></i>Search
+            </button>
+        </div>
+    </form>
+
+    <!-- Loading Indicator -->
+    <div class="search-loading" id="searchLoading" style="display: none;">
+        <div class="spinner"></div>
+        <p class="text-light opacity-75 mt-3 mb-0">Searching...</p>
+    </div>
+
+    <div id="searchResults">
+    @if (Model.Result != null)
+    {
+        if (!Model.Result.IsSuccess)
+        {
+            <div class="alert alert-warning d-flex align-items-center" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <div>
+                    @(!string.IsNullOrWhiteSpace(Model.Result.ErrorMessage)
+                        ? Model.Result.ErrorMessage
+                        : "Search failed. Please try again.")
+                </div>
+            </div>
+        }
+        else if (Model.Result.Results.Count == 0)
+        {
+            <div class="alert alert-info d-flex align-items-center" role="alert">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                <div>No results found. Try a different search term.</div>
+            </div>
+        }
+        else
+        {
+            <div class="search-table">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th class="col-title">Title</th>
+                                <th class="col-size">Size</th>
+                                <th class="col-seeders">Seeders</th>
+                                <th class="col-leechers">Leechers</th>
+                                <th class="col-date">Date</th>
+                                <th class="col-action">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var item in Model.Result.Results)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="torrent-title">@item.Name</div>
+                                </td>
+                                <td>
+                                    <span class="torrent-size">@item.Size</span>
+                                </td>
+                                <td>
+                                    <span class="badge-seeders">@item.Seeders</span>
+                                </td>
+                                <td>
+                                    <span class="badge-leechers">@item.Leechers</span>
+                                </td>
+                                <td>
+                                    <span class="torrent-date">@item.Date</span>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(item.Magnet) && item.Magnet != "Na")
+                                    {
+                                        <a href="@item.Magnet" class="magnet-btn">Download</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-secondary">N/A</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="mt-3 text-light opacity-75">
+                <small>Found @Model.Result.Results.Count result(s)</small>
+            </div>
+        }
+    }
     </div>
 </div>
 
-<form method="get" asp-controller="Search" asp-action="Index" class="mb-4">
-    <div class="input-group">
-        <input type="text" class="form-control" name="query" value="@Model.Query" placeholder="Search for a song or artist..." />
-        <button class="btn btn-primary" type="submit">Search</button>
-    </div>
-</form>
-
-@if (Model.Result != null)
-{
-    if (!Model.Result.IsSuccess)
-    {
-        <div class="alert alert-warning">
-            @(!string.IsNullOrWhiteSpace(Model.Result.ErrorMessage)
-                ? Model.Result.ErrorMessage
-                : "Search failed. Please try again.")
-        </div>
-    }
-    else if (Model.Result.Results.Count == 0)
-    {
-        <div class="alert alert-info">No results found.</div>
-    }
-    else
-    {
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Size</th>
-                        <th>Seeders</th>
-                        <th>Leechers</th>
-                        <th>Date</th>
-                        <th>Magnet</th>
-                    </tr>
-                </thead>
-                <tbody>
-                @foreach (var item in Model.Result.Results)
-                {
-                    <tr>
-                        <td>@item.Name</td>
-                        <td>@item.Size</td>
-                        <td>@item.Seeders</td>
-                        <td>@item.Leechers</td>
-                        <td>@item.Date</td>
-                        <td>
-                            @if (!string.IsNullOrWhiteSpace(item.Magnet) && item.Magnet != "Na")
-                            {
-                                <a href="@item.Magnet">Magnet</a>
-                            }
-                            else
-                            {
-                                <span class="text-muted">N/A</span>
-                            }
-                        </td>
-                    </tr>
-                }
-                </tbody>
-            </table>
-        </div>
-    }
-}
+<script>
+    // Show loading indicator and hide results when form is submitted
+    document.getElementById('searchForm').addEventListener('submit', function() {
+        document.getElementById('searchLoading').style.display = 'flex';
+        document.getElementById('searchResults').style.display = 'none';
+    });
+</script>

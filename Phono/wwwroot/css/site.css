@@ -2074,3 +2074,170 @@ footer a:hover {
 .alert-info li:last-child {
     margin-bottom: 0;
 }
+
+/* ========================================
+   Search Page Styles
+   ======================================== */
+/* Loading indicator */
+.search-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-2xl);
+    min-height: 200px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-top-color: var(--color-accent-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Dark themed table */
+.search-table {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+}
+
+.search-table .table {
+    margin-bottom: 0;
+    color: var(--color-text-primary);
+    background-color: transparent !important;
+}
+
+.search-table .table thead {
+    background: var(--color-bg-secondary) !important;
+}
+
+.search-table .table thead th {
+    border-bottom: 1px solid var(--color-border) !important;
+    color: var(--color-text-secondary) !important;
+    background-color: var(--color-bg-secondary) !important;
+    font-weight: 600;
+    padding: var(--space-md) var(--space-lg);
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.05em;
+}
+
+.search-table .table thead th.col-title {
+    width: 40%;
+}
+
+.search-table .table thead th.col-size {
+    width: 10%;
+}
+
+.search-table .table thead th.col-seeders {
+    width: 10%;
+}
+
+.search-table .table thead th.col-leechers {
+    width: 10%;
+}
+
+.search-table .table thead th.col-date {
+    width: 15%;
+}
+
+.search-table .table thead th.col-action {
+    width: 15%;
+}
+
+.search-table .table tbody {
+    background-color: transparent !important;
+}
+
+.search-table .table tbody tr {
+    border-bottom: 1px solid var(--color-border);
+    transition: all var(--transition-base);
+    background-color: transparent !important;
+}
+
+.search-table .table tbody tr:hover,
+.search-table .table-hover tbody tr:hover {
+    background-color: var(--color-bg-card-hover) !important;
+    border-color: var(--color-border-light);
+}
+
+.search-table .table tbody td {
+    padding: var(--space-md) var(--space-lg);
+    vertical-align: middle;
+    color: var(--color-text-primary) !important;
+    background-color: transparent !important;
+    border-color: var(--color-border) !important;
+}
+
+.search-table .table tbody tr:last-child {
+    border-bottom: none;
+}
+
+/* Seeder/Leecher badges */
+.badge-seeders {
+    background: var(--color-success);
+    color: white;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.badge-leechers {
+    background: var(--color-error);
+    color: white;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+/* Magnet link button */
+.magnet-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: linear-gradient(135deg, var(--color-accent-primary) 0%, var(--color-accent-secondary) 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all var(--transition-base);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.magnet-btn:hover {
+    background: linear-gradient(135deg, var(--color-accent-secondary) 0%, var(--color-accent-primary) 100%);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md), var(--shadow-glow);
+}
+
+.magnet-btn::before {
+    content: "🧲";
+    font-size: 1rem;
+}
+
+/* Title column styling */
+.torrent-title {
+    font-weight: 500;
+    color: var(--color-accent-primary);
+}
+
+/* Size and date styling */
+.torrent-size, .torrent-date {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
