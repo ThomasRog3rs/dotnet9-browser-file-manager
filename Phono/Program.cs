@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Phono.Data;
 using Phono.Models;
 using Phono.Services;
@@ -93,6 +94,16 @@ builder.Services.AddScoped<MetadataSyncService>();
 // Configure compression options
 builder.Services.Configure<CompressionOptions>(builder.Configuration.GetSection("Compression"));
 builder.Services.AddScoped<AudioCompressionService>();
+
+// Configure MagnetAPI service
+builder.Services.Configure<MagnetApiOptions>(builder.Configuration.GetSection("MagnetApi"));
+builder.Services.AddHttpClient<MagnetApiService>((serviceProvider, client) =>
+{
+    var options = serviceProvider.GetRequiredService<IOptions<MagnetApiOptions>>();
+    client.BaseAddress = new Uri(options.Value.BaseUrl);
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+builder.Services.AddScoped<MagnetApiService>();
 
 var app = builder.Build();
 

@@ -7,7 +7,29 @@ services:
       - "8080:8080"
     environment:
       ASPNETCORE_ENVIRONMENT: Production
+      MagnetApi__BaseUrl: "http://magnetapi:8000"
     volumes:
       - ./data:/app/Data
       - ./uploads:/app/wwwroot/uploads
+    depends_on:
+      - magnetapi
+    networks:
+      - backend
     restart: unless-stopped
+
+  magnetapi:
+    image: ghcr.io/thomasrog3rs/magnetapi:v0.1
+    # Internal only - not exposed to host (remove ports for production)
+    # Uncomment below if you need to debug/test from host:
+    # ports:
+    #   - "8000:8000"
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+    networks:
+      - backend
+    restart: unless-stopped
+
+networks:
+  backend:
+    driver: bridge
