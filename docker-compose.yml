@@ -23,6 +23,9 @@ services:
     # Uncomment below if you need to debug/test from host:
     # ports:
     #   - "8000:8000"
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
     networks:
       - backend
     restart: unless-stopped

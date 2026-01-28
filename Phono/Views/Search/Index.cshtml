@@ -1,0 +1,74 @@
+@model Phono.ViewModels.MagnetSearchViewModel
+
+@{
+    ViewData["Title"] = "Search";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="h3 mb-0">Search</h1>
+        <p class="text-muted mb-0">Search Pirate Bay audio torrents.</p>
+    </div>
+</div>
+
+<form method="get" asp-controller="Search" asp-action="Index" class="mb-4">
+    <div class="input-group">
+        <input type="text" class="form-control" name="query" value="@Model.Query" placeholder="Search for a song or artist..." />
+        <button class="btn btn-primary" type="submit">Search</button>
+    </div>
+</form>
+
+@if (Model.Result != null)
+{
+    if (!Model.Result.IsSuccess)
+    {
+        <div class="alert alert-warning">
+            @(!string.IsNullOrWhiteSpace(Model.Result.ErrorMessage)
+                ? Model.Result.ErrorMessage
+                : "Search failed. Please try again.")
+        </div>
+    }
+    else if (Model.Result.Results.Count == 0)
+    {
+        <div class="alert alert-info">No results found.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Size</th>
+                        <th>Seeders</th>
+                        <th>Leechers</th>
+                        <th>Date</th>
+                        <th>Magnet</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var item in Model.Result.Results)
+                {
+                    <tr>
+                        <td>@item.Name</td>
+                        <td>@item.Size</td>
+                        <td>@item.Seeders</td>
+                        <td>@item.Leechers</td>
+                        <td>@item.Date</td>
+                        <td>
+                            @if (!string.IsNullOrWhiteSpace(item.Magnet) && item.Magnet != "Na")
+                            {
+                                <a href="@item.Magnet">Magnet</a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">N/A</span>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+}
